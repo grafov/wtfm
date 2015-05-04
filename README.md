@@ -3,6 +3,11 @@
 The tool for lazy programmers to maintain docs with code in `go`.
 It oriented on documenting `go` code and useles for other langs.
 
+## Status
+
+Program yet unusable and development only started. If you interested in
+this tool for `go` just vote project with a star.
+
 ## Why?
 
 0. Of course I use `godoc` for generating documentation for `go` code. But
