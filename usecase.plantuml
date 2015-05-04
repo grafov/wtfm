@@ -1,0 +1,29 @@
+@startuml
+actor coder
+actor techwriter
+
+(Generate code with comments) as (code)
+(Describe interface and make some lyrics) as (textinp)
+(Engine parses comments and generate API listing) as (api)
+(Engine parses reST, markdown, plantuml & pictures input) as (pages)
+(Convert to HTML) as (html)
+(Optionally serve HTML docs) as (serve)
+
+coder --> (code)
+techwriter --> (textinp) 
+(code) --> (api)
+note left of (api)
+  Use `godoc` for generate API pages.
+  Additionally parse special comments
+  for describe HTTP/WS API.
+end note
+(textinp) --> (pages)
+note right of (pages)
+  Use external C libs for reST, 
+  use go libs for markdown.
+  Also call java' `plantuml` tool.
+end note
+(pages) --> (html)
+(api) --> (html)
+(html) --> (serve) 
+@enduml
