@@ -28,7 +28,7 @@ with code and text docs.
 5. I want a HTML output for both and simple tool to serve these pages
 without setup external webserver.
 
-So I begin to experiment with this new tool named `wtfm`.
+So I started to experiment with this new tool named `wtfm`.
 
 ![usecase.png](usecase.png)
 
