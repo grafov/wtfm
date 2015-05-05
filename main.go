@@ -24,6 +24,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -42,17 +43,36 @@ func main() {
 	}
 
 	switch flag.Arg(0) {
-	case "build":
-		makeReST(os.Stdout, build(path))
-	case "serve":
+	case "parse": // analyze sources and make rest/markdown
+		parse(path)
+		makeReST(os.Stdout)
+	case "build": // generate html output
+	case "serve": // serve html pages
 	}
 }
 
-// do `build` command
-func build(path string) API {
+// do `parse` command
+func parse(path string) {
+	parseDirTree(path)
+}
+
+// Recursively parse tree of nested packages
+func parseDirTree(root string) {
+	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			parsePackage(path)
+		}
+		return nil
+	})
+}
+
+// Non recursively parse files of a single package
+func parsePackage(path string) API {
 	var (
 		call *apiCallHTTP
-		api  API
 	)
 	fset := token.NewFileSet() // positions are relative to fset
 	pkgs, err := parser.ParseDir(fset, path, func(f os.FileInfo) bool { return true }, parser.ParseComments)
@@ -77,7 +97,8 @@ func build(path string) API {
 					case !httpMode && strings.HasPrefix(line, "#http"):
 						if err := call.parseHttpLine(line[6:]); err == nil {
 							httpMode = true
-							api = append(api, call)
+							api.Set(call)
+							description = append(description, "\n")
 							continue
 						}
 					case pathArg:
@@ -106,20 +127,19 @@ func build(path string) API {
 					switch {
 					case httpMode:
 						switch strings.ToLower(line) {
-						// TODO выбрать по одному варианту имен, выкинуть лишние
-						case "url params:", "path params:", "url args:", "path args:":
+						case "path params:":
 							pathArg = true
 							queryArg = false
 							formArg = false
 							headerArg = false
 							continue
-						case "query params:", "query args:":
+						case "query params:":
 							pathArg = false
 							queryArg = true
 							formArg = false
 							headerArg = false
 							continue
-						case "form params:", "form values:":
+						case "form params:":
 							pathArg = false
 							queryArg = false
 							formArg = true
@@ -132,6 +152,9 @@ func build(path string) API {
 							headerArg = true
 							continue
 						}
+					}
+					if line == "" {
+						line = "\n"
 					}
 					description = append(description, line)
 				}

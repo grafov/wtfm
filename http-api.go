@@ -20,12 +20,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"net/http"
+	"sort"
 	"strings"
 )
 
-type API []*apiCallHTTP
+var api API = make(map[string]*apiCallHTTP, 0)
+
+type API map[string]*apiCallHTTP
+
+func (a API) Set(call *apiCallHTTP) {
+	if !sort.StringsAreSorted(call.Methods) {
+		sort.Strings(call.Methods)
+	}
+	a[fmt.Sprintf("%s%s", call.Path, call.Methods)] = call
+}
 
 // represents HTTP API
 type apiCallHTTP struct {
