@@ -32,10 +32,13 @@ var api API = make(map[string]*apiCallHTTP, 0)
 type API map[string]*apiCallHTTP
 
 func (a API) Set(call *apiCallHTTP) {
-	if !sort.StringsAreSorted(call.Methods) {
-		sort.Strings(call.Methods)
+	if call.Desc == nil {
+		if !sort.StringsAreSorted(call.Methods) {
+			sort.Strings(call.Methods)
+		}
+		call.Desc = []string{fmt.Sprintf("%s%s", call.Path, call.Methods)}
 	}
-	a[fmt.Sprintf("%s%s", call.Path, call.Methods)] = call
+	a[call.Desc[0]] = call
 }
 
 // represents HTTP API
