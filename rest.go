@@ -51,14 +51,14 @@ func makeReST(out io.Writer) {
 			out.Write([]byte("\nQuery arguments:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
 			for _, param := range call.QueryParams {
-				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n%s\n", param.Name, param.Type, param.Desc)))
+				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}
 		if len(call.FormParams) > 0 {
 			out.Write([]byte("\nForm values:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
 			for _, param := range call.FormParams {
-				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n%s\n", param.Name, param.Type, param.Desc)))
+				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}
 		out.Write(ln)
