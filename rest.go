@@ -38,6 +38,9 @@ func makeReST(out io.Writer) {
 	sort.Strings(mk)
 	for _, key := range mk {
 		call := api[key]
+		if call.Desc[0] == "\n" {
+			call.Desc[0] = fmt.Sprintf("%s %s", call.Methods, call.Path)
+		}
 		out.Write([]byte(fmt.Sprintf("\n\n%s\n=%s\n", call.Desc[0], strings.Repeat("=", len(call.Desc[0])))))
 		out.Write([]byte(fmt.Sprintf("\n``%s %s``\n", call.Methods, call.Path)))
 		if len(call.PathParams) > 0 {
