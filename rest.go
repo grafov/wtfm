@@ -46,21 +46,45 @@ func makeReST(out io.Writer) {
 		if len(call.PathParams) > 0 {
 			out.Write([]byte("\nParameters in a path:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
-			for _, param := range call.PathParams {
+			pk := make([]string, len(call.PathParams))
+			i = 0
+			for k, _ := range call.PathParams {
+				pk[i] = k
+				i++
+			}
+			sort.Strings(pk)
+			for _, key := range pk {
+				param := call.PathParams[key]
 				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}
 		if len(call.QueryParams) > 0 {
 			out.Write([]byte("\nQuery arguments:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
-			for _, param := range call.QueryParams {
+			pk := make([]string, len(call.QueryParams))
+			i = 0
+			for k, _ := range call.QueryParams {
+				pk[i] = k
+				i++
+			}
+			sort.Strings(pk)
+			for _, key := range pk {
+				param := call.QueryParams[key]
 				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}
 		if len(call.FormParams) > 0 {
 			out.Write([]byte("\nForm values:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
-			for _, param := range call.FormParams {
+			pk := make([]string, len(call.FormParams))
+			i = 0
+			for k, _ := range call.FormParams {
+				pk[i] = k
+				i++
+			}
+			sort.Strings(pk)
+			for _, key := range pk {
+				param := call.FormParams[key]
 				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}
