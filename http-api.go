@@ -20,29 +20,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import (
 	"errors"
-	"fmt"
 	"go/ast"
 	"net/http"
-	"sort"
 	"strings"
 )
 
-var api API = make(map[string]*apiCallHTTP, 0)
+var api API
 
-type API map[string]*apiCallHTTP
+type API []*apiCallHTTP
 
-func (a API) Set(call *apiCallHTTP) {
-	if call.Desc == nil {
-		if !sort.StringsAreSorted(call.Methods) {
-			sort.Strings(call.Methods)
-		}
-		call.Desc = []string{fmt.Sprintf("%s%s", call.Path, call.Methods)}
-	}
-	a[call.Desc[0]] = call
+// func (a API) Set(call *apiCallHTTP) {
+// 	if call.Desc == nil {
+// 		if !sort.StringsAreSorted(call.Methods) {
+// 			sort.Strings(call.Methods)
+// 		}
+// 		call.Desc = []string{fmt.Sprintf("%s %s", call.Methods, call.Path)}
+// 	}
+// 	a[call.Desc[0]] = call
+// }
+
+// Len is part of sort.Interface.
+func (s API) Len() int {
+	return len(s)
+}
+
+// Swap is part of sort.Interface.
+func (s API) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+// Less is part of sort.Interface.
+func (s API) Less(i, j int) bool {
+	return s[i].Title < s[j].Title
 }
 
 // represents HTTP API
 type apiCallHTTP struct {
+	Title        string
 	Methods      []string
 	Path         string
 	PathParams   map[string]*param

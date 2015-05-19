@@ -25,6 +25,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -97,7 +98,7 @@ func parsePackage(path string) API {
 					case !httpMode && strings.HasPrefix(line, "#http"):
 						if err := call.parseHttpLine(line[6:]); err == nil {
 							httpMode = true
-							api.Set(call)
+							api = append(api, call)
 							description = append(description, "\n")
 							continue
 						}
@@ -158,7 +159,18 @@ func parsePackage(path string) API {
 					}
 					description = append(description, line)
 				}
+				if !sort.StringsAreSorted(call.Methods) {
+					sort.Strings(call.Methods)
+				}
 				call.Desc = description
+				if call.Desc == nil {
+					call.Desc = []string{"\n"}
+				}
+				if call.Desc[0] == "\n" {
+					call.Title = fmt.Sprintf("%s %s", call.Path, call.Methods)
+				} else {
+					call.Title = call.Desc[0]
+				}
 			}
 		}
 	}
