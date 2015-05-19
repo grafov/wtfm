@@ -57,7 +57,7 @@ func makeReST(out io.Writer) {
 			}
 		}
 		if len(call.QueryParams) > 0 {
-			out.Write([]byte("\nQuery arguments:\n\n"))
+			out.Write([]byte("\nParameters of a query string:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
 			pk := make([]string, len(call.QueryParams))
 			i := 0
@@ -72,7 +72,7 @@ func makeReST(out io.Writer) {
 			}
 		}
 		if len(call.FormParams) > 0 {
-			out.Write([]byte("\nForm values:\n\n"))
+			out.Write([]byte("\nParameters in a body of a request:\n\n"))
 			out.Write([]byte("\n.. glossary::\n"))
 			pk := make([]string, len(call.FormParams))
 			i := 0
