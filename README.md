@@ -37,4 +37,26 @@ So I started to experiment with this new tool named `wtfm`.
 
 ![usecase.png](usecase.png)
 
+##Documentation samples
 
+    // Sample method
+    //
+    // #http /example/method
+    //
+    // Query params:
+    // :test int: just a number
+    // :test2 string
+
+Will generate reST code:
+
+    Sample method
+    ==============
+
+    ``[GET] /example/method``
+
+    Parameters in a query:
+
+    .. glossary::
+      ``test`` int
+         just a number
+      ``test2`` string
