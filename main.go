@@ -74,6 +74,8 @@ func parseDirTree(root string) {
 func parsePackage(path string) API {
 	var (
 		call *apiCallHTTP
+		last string
+		err  error
 	)
 	fset := token.NewFileSet() // positions are relative to fset
 	pkgs, err := parser.ParseDir(fset, path, func(f os.FileInfo) bool { return true }, parser.ParseComments)
@@ -103,26 +105,44 @@ func parsePackage(path string) API {
 							continue
 						}
 					case pathArg:
-						if strings.HasPrefix(line, ":") {
-							if err := call.parsePathArg(line[1:]); err == nil {
+						switch {
+						case strings.HasPrefix(line, ":"):
+							if last, err = call.parsePathArg(line[1:]); err == nil {
 								continue
 							}
+							pathArg = false
+						case line == "":
+							pathArg = false
+						default:
+							call.PathParams[last].Desc = fmt.Sprintf("%s %s", call.PathParams[last].Desc, line)
+							continue
 						}
-						pathArg = false
 					case queryArg:
-						if strings.HasPrefix(line, ":") {
-							if err := call.parseQueryArg(line[1:]); err == nil {
+						switch {
+						case strings.HasPrefix(line, ":"):
+							if last, err = call.parseQueryArg(line[1:]); err == nil {
 								continue
 							}
+							queryArg = false
+						case line == "":
+							pathArg = false
+						default:
+							call.QueryParams[last].Desc = fmt.Sprintf("%s %s", call.QueryParams[last].Desc, line)
+							continue
 						}
-						queryArg = false
 					case formArg:
-						if strings.HasPrefix(line, ":") {
-							if err := call.parseFormArg(line[1:]); err == nil {
+						switch {
+						case strings.HasPrefix(line, ":"):
+							if last, err = call.parseFormArg(line[1:]); err == nil {
 								continue
 							}
+							formArg = false
+						case line == "":
+							pathArg = false
+						default:
+							call.FormParams[last].Desc = fmt.Sprintf("%s %s", call.FormParams[last].Desc, line)
+							continue
 						}
-						formArg = false
 					case headerArg:
 					}
 					switch {
@@ -156,6 +176,10 @@ func parsePackage(path string) API {
 					}
 					if line == "" {
 						line = "\n"
+						pathArg = false
+						queryArg = false
+						formArg = false
+						headerArg = false
 					}
 					description = append(description, line)
 				}

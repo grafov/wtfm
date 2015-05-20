@@ -117,7 +117,7 @@ func (c *apiCallHTTP) parseHttpLine(s string) error {
 }
 
 // parse path argument description
-func (c *apiCallHTTP) parsePathArg(s string) error {
+func (c *apiCallHTTP) parsePathArg(s string) (string, error) {
 	param := new(param)
 	param.Kind = UrlParam
 	param.Required = true          // TODO parse REQUIRED
@@ -133,14 +133,14 @@ func (c *apiCallHTTP) parsePathArg(s string) error {
 		param.Desc = strings.Join(parts[1:], ":")
 	}
 	if param.Name == "" {
-		return errors.New("empty path param definition")
+		return "", errors.New("empty path param definition")
 	}
 	c.PathParams[strings.ToLower(param.Name)] = param
-	return nil
+	return param.Name, nil
 }
 
 // parse query argument description
-func (c *apiCallHTTP) parseQueryArg(s string) error {
+func (c *apiCallHTTP) parseQueryArg(s string) (string, error) {
 	param := new(param)
 	param.Kind = QueryParam
 	param.Required = false         // TODO parse REQUIRED
@@ -156,14 +156,14 @@ func (c *apiCallHTTP) parseQueryArg(s string) error {
 		param.Desc = strings.Join(parts[1:], ":")
 	}
 	if param.Name == "" {
-		return errors.New("empty query arg definition")
+		return "", errors.New("empty query arg definition")
 	}
 	c.QueryParams[strings.ToLower(param.Name)] = param
-	return nil
+	return param.Name, nil
 }
 
 // parse form value description
-func (c *apiCallHTTP) parseFormArg(s string) error {
+func (c *apiCallHTTP) parseFormArg(s string) (string, error) {
 	// TODO parse REQUIRED
 	param := new(param)
 	param.Kind = FormParam
@@ -179,8 +179,8 @@ func (c *apiCallHTTP) parseFormArg(s string) error {
 		param.Desc = strings.Join(parts[1:], ":")
 	}
 	if param.Name == "" {
-		return errors.New("empty form value definition")
+		return "", errors.New("empty form value definition")
 	}
 	c.FormParams[strings.ToLower(param.Name)] = param
-	return nil
+	return param.Name, nil
 }
