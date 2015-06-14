@@ -62,8 +62,7 @@ type apiCallHTTP struct {
 	PathParams   map[string]*param
 	QueryParams  map[string]*param
 	FormParams   map[string]*param
-	HeaderParams map[string]*param
-	Headers      []http.Header
+	HeaderParams []http.Header
 	Context      *ast.File
 	Desc         []string
 }
@@ -91,7 +90,6 @@ func newApiCallHTTP(context *ast.File) *apiCallHTTP {
 	call.PathParams = make(map[string]*param)
 	call.QueryParams = make(map[string]*param)
 	call.FormParams = make(map[string]*param)
-	call.HeaderParams = make(map[string]*param)
 	return call
 }
 
@@ -183,4 +181,11 @@ func (c *apiCallHTTP) parseFormArg(s string) (string, error) {
 	}
 	c.FormParams[strings.ToLower(param.Name)] = param
 	return param.Name, nil
+}
+
+// parse form value description
+func (c *apiCallHTTP) parseHeaderArg(s string) (string, error) {
+	//parts := strings.Split(s, ":") // separate name-type from description
+	// XXX
+	return "", nil
 }

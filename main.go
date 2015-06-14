@@ -144,6 +144,17 @@ func parsePackage(path string) API {
 							continue
 						}
 					case headerArg:
+						switch {
+						case strings.Contains(line, ":"):
+							if last, err = call.parseHeaderArg(line); err == nil {
+								continue
+							}
+							headerArg = false
+						case line == "":
+							headerArg = false
+						default:
+							continue
+						}						
 					}
 					switch {
 					case httpMode:
