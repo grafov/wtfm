@@ -29,16 +29,6 @@ var api API
 
 type API []*apiCallHTTP
 
-// func (a API) Set(call *apiCallHTTP) {
-// 	if call.Desc == nil {
-// 		if !sort.StringsAreSorted(call.Methods) {
-// 			sort.Strings(call.Methods)
-// 		}
-// 		call.Desc = []string{fmt.Sprintf("%s %s", call.Methods, call.Path)}
-// 	}
-// 	a[call.Desc[0]] = call
-// }
-
 // Len is part of sort.Interface.
 func (s API) Len() int {
 	return len(s)
@@ -56,15 +46,15 @@ func (s API) Less(i, j int) bool {
 
 // represents HTTP API
 type apiCallHTTP struct {
-	Title        string
-	Methods      []string
-	Path         string
-	PathParams   map[string]*param
-	QueryParams  map[string]*param
-	FormParams   map[string]*param
-	HeaderParams []http.Header
-	Context      *ast.File
-	Desc         []string
+	Title       string
+	Methods     []string
+	Path        string
+	PathParams  map[string]*param
+	QueryParams map[string]*param
+	FormParams  map[string]*param
+	Headers     http.Header
+	Context     *ast.File
+	Desc        []string
 }
 
 type param struct {
@@ -90,6 +80,7 @@ func newApiCallHTTP(context *ast.File) *apiCallHTTP {
 	call.PathParams = make(map[string]*param)
 	call.QueryParams = make(map[string]*param)
 	call.FormParams = make(map[string]*param)
+	call.Headers = make(http.Header)
 	return call
 }
 
@@ -184,8 +175,14 @@ func (c *apiCallHTTP) parseFormArg(s string) (string, error) {
 }
 
 // parse form value description
-func (c *apiCallHTTP) parseHeaderArg(s string) (string, error) {
-	//parts := strings.Split(s, ":") // separate name-type from description
-	// XXX
-	return "", nil
+func (c *apiCallHTTP) parseHeaderArg(s string) error {
+	parts := strings.SplitN(s, ":", 2)
+	if len(parts) < 2 {
+		return errors.New("parsing error for header")
+	}
+	if strings.TrimSpace(parts[1]) == "" {
+		return errors.New("empty value for header")
+	}
+	c.Headers.Add(parts[0], parts[1])
+	return nil
 }

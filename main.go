@@ -146,7 +146,7 @@ func parsePackage(path string) API {
 					case headerArg:
 						switch {
 						case strings.Contains(line, ":"):
-							if last, err = call.parseHeaderArg(line); err == nil {
+							if err = call.parseHeaderArg(line); err == nil {
 								continue
 							}
 							headerArg = false
@@ -154,7 +154,7 @@ func parsePackage(path string) API {
 							headerArg = false
 						default:
 							continue
-						}						
+						}
 					}
 					switch {
 					case httpMode:
@@ -177,7 +177,7 @@ func parsePackage(path string) API {
 							formArg = true
 							headerArg = false
 							continue
-						case "header params:":
+						case "headers:":
 							pathArg = false
 							queryArg = false
 							formArg = false
