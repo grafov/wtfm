@@ -95,10 +95,10 @@ func parsePackage(path string) API {
 				call = newApiCallHTTP(f)
 				lines := strings.Split(c.Text(), "\n")
 				for _, line := range lines {
-					line = strings.TrimSpace(line)
+					sline := strings.TrimSpace(line)
 					switch {
-					case !httpMode && strings.HasPrefix(line, "#http"):
-						if err := call.parseHttpLine(line[6:]); err == nil {
+					case !httpMode && strings.HasPrefix(sline, "#http"):
+						if err := call.parseHttpLine(sline[6:]); err == nil {
 							httpMode = true
 							api = append(api, call)
 							description = append(description, "\n")
@@ -106,51 +106,51 @@ func parsePackage(path string) API {
 						}
 					case pathArg:
 						switch {
-						case strings.HasPrefix(line, ":"):
-							if last, err = call.parsePathArg(line[1:]); err == nil {
+						case strings.HasPrefix(sline, ":"):
+							if last, err = call.parsePathArg(sline[1:]); err == nil {
 								continue
 							}
 							pathArg = false
-						case line == "":
+						case sline == "":
 							pathArg = false
 						default:
-							call.PathParams[last].Desc = fmt.Sprintf("%s %s", call.PathParams[last].Desc, line)
+							call.PathParams[last].Desc = fmt.Sprintf("%s %s", call.PathParams[last].Desc, sline)
 							continue
 						}
 					case queryArg:
 						switch {
-						case strings.HasPrefix(line, ":"):
-							if last, err = call.parseQueryArg(line[1:]); err == nil {
+						case strings.HasPrefix(sline, ":"):
+							if last, err = call.parseQueryArg(sline[1:]); err == nil {
 								continue
 							}
 							queryArg = false
-						case line == "":
+						case sline == "":
 							pathArg = false
 						default:
-							call.QueryParams[last].Desc = fmt.Sprintf("%s %s", call.QueryParams[last].Desc, line)
+							call.QueryParams[last].Desc = fmt.Sprintf("%s %s", call.QueryParams[last].Desc, sline)
 							continue
 						}
 					case formArg:
 						switch {
-						case strings.HasPrefix(line, ":"):
-							if last, err = call.parseFormArg(line[1:]); err == nil {
+						case strings.HasPrefix(sline, ":"):
+							if last, err = call.parseFormArg(sline[1:]); err == nil {
 								continue
 							}
 							formArg = false
-						case line == "":
+						case sline == "":
 							pathArg = false
 						default:
-							call.FormParams[last].Desc = fmt.Sprintf("%s %s", call.FormParams[last].Desc, line)
+							call.FormParams[last].Desc = fmt.Sprintf("%s %s", call.FormParams[last].Desc, sline)
 							continue
 						}
 					case headerArg:
 						switch {
-						case strings.Contains(line, ":"):
-							if err = call.parseHeaderArg(line); err == nil {
+						case strings.Contains(sline, ":"):
+							if err = call.parseHeaderArg(sline); err == nil {
 								continue
 							}
 							headerArg = false
-						case line == "":
+						case sline == "":
 							headerArg = false
 						default:
 							continue
@@ -158,7 +158,7 @@ func parsePackage(path string) API {
 					}
 					switch {
 					case httpMode:
-						switch strings.ToLower(line) {
+						switch strings.ToLower(sline) {
 						case "path params:":
 							pathArg = true
 							queryArg = false
@@ -185,7 +185,7 @@ func parsePackage(path string) API {
 							continue
 						}
 					}
-					if line == "" {
+					if sline == "" {
 						line = "\n"
 						pathArg = false
 						queryArg = false
