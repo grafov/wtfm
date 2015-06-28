@@ -46,40 +46,27 @@ func (s API) Less(i, j int) bool {
 
 // represents HTTP API
 type apiCallHTTP struct {
-	Title       string
-	Methods     []string
-	Path        string
-	PathParams  map[string]*param
-	QueryParams map[string]*param
-	FormParams  map[string]*param
-	Headers     http.Header
-	Context     *ast.File
-	Desc        []string
+	Title   string
+	Methods []string
+	Path    string
+	Params  map[string]map[string]*param // kind - name - param
+	Headers http.Header
+	Context *ast.File
+	Desc    []string
 }
 
 type param struct {
 	Name     string
-	Kind     parType
+	Kind     string
 	Type     string
 	Required bool
 	Desc     string
 }
 
-type parType uint8
-
-const (
-	UrlParam parType = iota
-	QueryParam
-	FormParam
-	HeaderParam
-)
-
 func newApiCallHTTP(context *ast.File) *apiCallHTTP {
 	call := new(apiCallHTTP)
 	call.Context = context
-	call.PathParams = make(map[string]*param)
-	call.QueryParams = make(map[string]*param)
-	call.FormParams = make(map[string]*param)
+	call.Params = make(map[string]map[string]*param)
 	call.Headers = make(http.Header)
 	return call
 }
@@ -106,76 +93,33 @@ func (c *apiCallHTTP) parseHttpLine(s string) error {
 }
 
 // parse path argument description
-func (c *apiCallHTTP) parsePathArg(s string) (string, error) {
-	param := new(param)
-	param.Kind = UrlParam
-	param.Required = true          // TODO parse REQUIRED
+func (c *apiCallHTTP) parseArg(kind, s string) (string, error) {
+	par := new(param)
+	par.Kind = kind
+	par.Required = true            // TODO parse REQUIRED
 	parts := strings.Split(s, ":") // separate name-type from description
 	varparts := strings.Split(parts[0], " ")
-	param.Name = varparts[0]
+	par.Name = varparts[0]
 	if len(varparts) > 1 {
-		param.Type = varparts[1]
+		par.Type = varparts[1]
 	} else {
-		param.Type = "string"
+		par.Type = "string"
 	}
 	if len(parts) > 1 {
-		param.Desc = strings.Join(parts[1:], ":")
+		par.Desc = strings.Join(parts[1:], ":")
 	}
-	if param.Name == "" {
-		return "", errors.New("empty path param definition")
+	if par.Name == "" {
+		return "", errors.New("empty par definition")
 	}
-	c.PathParams[strings.ToLower(param.Name)] = param
-	return param.Name, nil
-}
-
-// parse query argument description
-func (c *apiCallHTTP) parseQueryArg(s string) (string, error) {
-	param := new(param)
-	param.Kind = QueryParam
-	param.Required = false         // TODO parse REQUIRED
-	parts := strings.Split(s, ":") // separate name-type from description
-	varparts := strings.Split(parts[0], " ")
-	param.Name = varparts[0]
-	if len(varparts) > 1 {
-		param.Type = varparts[1]
-	} else {
-		param.Type = "string"
+	if _, ok := c.Params[kind]; !ok {
+		c.Params[kind] = make(map[string]*param)
 	}
-	if len(parts) > 1 {
-		param.Desc = strings.Join(parts[1:], ":")
-	}
-	if param.Name == "" {
-		return "", errors.New("empty query arg definition")
-	}
-	c.QueryParams[strings.ToLower(param.Name)] = param
-	return param.Name, nil
+	c.Params[kind][strings.ToLower(par.Name)] = par
+	return par.Name, nil
 }
 
 // parse form value description
-func (c *apiCallHTTP) parseFormArg(s string) (string, error) {
-	// TODO parse REQUIRED
-	param := new(param)
-	param.Kind = FormParam
-	parts := strings.Split(s, ":") // separate name-type from description
-	varparts := strings.Split(parts[0], " ")
-	param.Name = varparts[0]
-	if len(varparts) > 1 {
-		param.Type = varparts[1]
-	} else {
-		param.Type = "string"
-	}
-	if len(parts) > 1 {
-		param.Desc = strings.Join(parts[1:], ":")
-	}
-	if param.Name == "" {
-		return "", errors.New("empty form value definition")
-	}
-	c.FormParams[strings.ToLower(param.Name)] = param
-	return param.Name, nil
-}
-
-// parse form value description
-func (c *apiCallHTTP) parseHeaderArg(s string) error {
+func (c *apiCallHTTP) parseHeader(s string) error {
 	parts := strings.SplitN(s, ":", 2)
 	if len(parts) < 2 {
 		return errors.New("parsing error for header")
