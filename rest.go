@@ -34,48 +34,18 @@ func makeReST(out io.Writer) {
 	for _, call := range api {
 		out.Write([]byte(fmt.Sprintf("\n\n%s\n=%s\n", call.Title, strings.Repeat("=", len(call.Title)))))
 		out.Write([]byte(fmt.Sprintf("\n``%s %s``\n", call.Methods, call.Path)))
-		if len(call.PathParams) > 0 {
-			out.Write([]byte("\nParameters in a path:\n\n"))
+		for kind, params := range call.Params {
+			out.Write([]byte(fmt.Sprintf("\n%s\n\n", kind)))
 			out.Write([]byte("\n.. glossary::\n"))
-			pk := make([]string, len(call.PathParams))
+			pk := make([]string, len(params))
 			i := 0
-			for k, _ := range call.PathParams {
+			for k, _ := range params {
 				pk[i] = k
 				i++
 			}
 			sort.Strings(pk)
 			for _, key := range pk {
-				param := call.PathParams[key]
-				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
-			}
-		}
-		if len(call.QueryParams) > 0 {
-			out.Write([]byte("\nParameters of a query string:\n\n"))
-			out.Write([]byte("\n.. glossary::\n"))
-			pk := make([]string, len(call.QueryParams))
-			i := 0
-			for k, _ := range call.QueryParams {
-				pk[i] = k
-				i++
-			}
-			sort.Strings(pk)
-			for _, key := range pk {
-				param := call.QueryParams[key]
-				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
-			}
-		}
-		if len(call.FormParams) > 0 {
-			out.Write([]byte("\nParameters in a body of a request:\n\n"))
-			out.Write([]byte("\n.. glossary::\n"))
-			pk := make([]string, len(call.FormParams))
-			i := 0
-			for k, _ := range call.FormParams {
-				pk[i] = k
-				i++
-			}
-			sort.Strings(pk)
-			for _, key := range pk {
-				param := call.FormParams[key]
+				param := params[key]
 				out.Write([]byte(fmt.Sprintf("  ``%s`` %s\n    %s\n", param.Name, param.Type, param.Desc)))
 			}
 		}

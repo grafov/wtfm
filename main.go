@@ -138,7 +138,8 @@ func parsePackage(path string) API {
 					if httpMode && strings.HasSuffix(lowsline, "params:") {
 						isArg = true
 						isHeader = false
-						kind = strings.SplitN(lowsline, " ", 2)[0]
+						// kind = strings.SplitN(lowsline, " ", 2)[0]
+						kind = sline
 						continue
 					}
 					if sline == "" {

@@ -94,25 +94,28 @@ func (c *apiCallHTTP) parseHttpLine(s string) error {
 
 // parse path argument description
 func (c *apiCallHTTP) parseArg(kind, s string) (string, error) {
-	param := new(param)
-	param.Kind = kind
-	param.Required = true          // TODO parse REQUIRED
+	par := new(param)
+	par.Kind = kind
+	par.Required = true            // TODO parse REQUIRED
 	parts := strings.Split(s, ":") // separate name-type from description
 	varparts := strings.Split(parts[0], " ")
-	param.Name = varparts[0]
+	par.Name = varparts[0]
 	if len(varparts) > 1 {
-		param.Type = varparts[1]
+		par.Type = varparts[1]
 	} else {
-		param.Type = "string"
+		par.Type = "string"
 	}
 	if len(parts) > 1 {
-		param.Desc = strings.Join(parts[1:], ":")
+		par.Desc = strings.Join(parts[1:], ":")
 	}
-	if param.Name == "" {
-		return "", errors.New("empty param definition")
+	if par.Name == "" {
+		return "", errors.New("empty par definition")
 	}
-	c.PathParams[kind][strings.ToLower(param.Name)] = param
-	return param.Name, nil
+	if _, ok := c.Params[kind]; !ok {
+		c.Params[kind] = make(map[string]*param)
+	}
+	c.Params[kind][strings.ToLower(par.Name)] = par
+	return par.Name, nil
 }
 
 // parse form value description
